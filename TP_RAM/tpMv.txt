@@ -1,0 +1,128 @@
+# Cuestionario Práctico - Máquinas Virtuales, Docker y GitHub Actions
+
+## Alumno: Valentin Lopez   
+## Fecha: 18/4
+
+
+---
+
+## Máquinas Virtuales
+
+1. ¿Qué es una máquina virtual y para qué se utiliza?  
+Una máquina virtual es un entorno que simula una computadora dentro de otra. Se utiliza para ejecutar sistemas operativos o programas de forma aislada sin afectar el sistema principal.
+
+2. Nombrá dos diferencias entre una máquina virtual y una computadora física.  
+- La máquina virtual depende de un sistema host, la física no.  
+- La VM comparte recursos (RAM, CPU), mientras que la física tiene recursos propios dedicados.
+
+3. ¿Qué función cumple un hipervisor?  
+El hipervisor es el software que permite crear y administrar máquinas virtuales. Se encarga de asignar los recursos del sistema físico a cada VM.
+
+4. Mencioná dos programas que permitan crear máquinas virtuales.  
+- VirtualBox  
+- VMware  
+
+5. ¿Qué significa asignar 4 GB de RAM a una máquina virtual?  
+Significa que la VM puede usar hasta 4 GB de la memoria RAM del sistema físico mientras está en funcionamiento.
+
+6. ¿Qué es una imagen ISO y para qué sirve?  
+Es un archivo que contiene una copia exacta de un sistema operativo o software. Se usa para instalar sistemas operativos en máquinas virtuales o físicas.
+
+7. ¿Para qué se utiliza SSH al conectarse a una máquina virtual Linux?  
+Se usa para conectarse de forma remota y segura a la máquina virtual mediante terminal.
+
+8. Escribí el comando para conectarte por SSH al usuario `admin` en la IP `192.168.1.50`  
+
+```bash
+ssh admin@192.168.1.50
+¿Qué significa que una máquina virtual sea efímera?
+Significa que no guarda cambios después de apagarse o reiniciarse, es temporal.
+¿Qué ventaja tiene usar snapshots en una VM?
+Permiten guardar el estado de la máquina en un momento determinado y volver a ese punto si algo falla.
+Docker
+¿Cuál es la diferencia entre imagen Docker y contenedor Docker?
+La imagen es como una plantilla o base, mientras que el contenedor es una instancia en ejecución de esa imagen.
+¿Qué comando muestra los contenedores en ejecución?
+docker ps
+¿Qué comando muestra todos los contenedores, incluso detenidos?
+docker ps -a
+¿Qué comando se usa para descargar una imagen de Ubuntu?
+docker pull ubuntu
+¿Qué comando crea y ejecuta un contenedor Ubuntu interactivo?
+docker run -it ubuntu
+¿Qué significa mapear el puerto 8080:80?
+Significa que el puerto 8080 de la máquina host se conecta con el puerto 80 del contenedor.
+Nombrá tres estados posibles de un contenedor Docker.
+Running (en ejecución)
+Stopped (detenido)
+Paused (pausado)
+¿Qué comando detiene un contenedor llamado webapp?
+docker stop webapp
+¿Qué comando elimina un contenedor llamado mysql-db?
+docker rm mysql-db
+Escribí un ejemplo simple de docker run con nginx exponiendo puerto 8080.
+docker run -d -p 8080:80 nginx
+GitHub Actions
+¿Qué es GitHub Actions?
+Es una herramienta de automatización que permite ejecutar tareas como tests o deploys automáticamente cuando ocurren eventos en un repositorio.
+¿Para qué sirve un archivo YAML en GitHub Actions?
+Sirve para definir los workflows, es decir, las acciones y pasos que se van a ejecutar.
+¿En qué carpeta se guardan los workflows?
+En .github/workflows/
+¿Qué evento ejecuta un workflow cuando se hace push al repositorio?
+El evento push.
+¿Qué hace la action actions/checkout?
+Descarga el código del repositorio dentro del runner.
+¿Qué hace la action actions/setup-node?
+Configura el entorno de Node.js con la versión indicada.
+¿Para qué sirve automatizar tests en CI/CD?
+Para detectar errores automáticamente antes de pasar a producción.
+Escribí una estructura mínima de workflow con push.
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+¿Qué ventaja tienen las runners efímeras?
+Son limpias en cada ejecución, lo que evita errores por configuraciones anteriores.
+¿Qué pasaría si falla un test en el pipeline?
+El pipeline se detiene y no continúa con los siguientes pasos.
+Práctica
+Escribí el comando para crear una carpeta llamada proyecto_vm.
+mkdir proyecto_vm
+Escribí el comando Linux para entrar en esa carpeta.
+cd proyecto_vm
+Escribí el comando para crear un archivo llamado app.js.
+touch app.js
+Escribí un Dockerfile mínimo usando Node.js.
+FROM node:18
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+
+CMD ["node", "app.js"]
+Escribí un workflow de GitHub Actions que ejecute npm install y npm test
+name: Node CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - run: npm install
+      - run: npm test
