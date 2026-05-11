@@ -1,0 +1,5 @@
+[
+  { "id": 1, "nombre": "Teclado Mecánico", "precio": 15000, "stock": 10 },
+  { "id": 2, "nombre": "Mouse Gamer", "precio": 8000, "stock": 5 },
+  { "id": 3, "nombre": "Monitor 24\"", "precio": 60000, "stock": 3 }
+]
