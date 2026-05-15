@@ -1,0 +1,17 @@
+services:
+  sistema-ventas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mvc-sistema-ventas
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+    volumes:
+      - ventas_data:/app/src/data
+    restart: unless-stopped
+
+volumes:
+  ventas_data:
