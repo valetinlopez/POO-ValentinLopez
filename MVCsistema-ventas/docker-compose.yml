@@ -9,8 +9,9 @@ services:
     environment:
       PORT: 3000
       NODE_ENV: production
+      DB_PATH: /app/src/database/data/sistema-ventas.db
     volumes:
-      - ventas_data:/app/src/data
+      - ventas_data:/app/src/database/data
     restart: unless-stopped
 
 volumes:

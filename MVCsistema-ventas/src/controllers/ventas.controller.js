@@ -1,4 +1,5 @@
 const ventasService = require("../services/ventas.service");
+const { ensureId } = require("../utils/validation.utils");
 
 const getAll = async (req, res, next) => {
   try {
@@ -11,7 +12,7 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = ensureId(req.params.id);
     const venta = await ventasService.obtenerPorId(id);
     res.status(200).json(venta);
   } catch (error) {
@@ -28,10 +29,9 @@ const create = async (req, res, next) => {
   }
 };
 
-// Cancelar = eliminar la venta + restaurar stock
 const cancel = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = ensureId(req.params.id);
     const venta = await ventasService.cancelar(id);
     res.status(200).json({ mensaje: "Venta cancelada", venta });
   } catch (error) {

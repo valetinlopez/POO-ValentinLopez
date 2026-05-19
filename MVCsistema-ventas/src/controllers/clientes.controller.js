@@ -1,4 +1,5 @@
 const clientesService = require("../services/clientes.service");
+const { ensureId } = require("../utils/validation.utils");
 
 const getAll = async (req, res, next) => {
   try {
@@ -11,7 +12,7 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = ensureId(req.params.id);
     const cliente = await clientesService.obtenerPorId(id);
     res.status(200).json(cliente);
   } catch (error) {
@@ -30,7 +31,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = ensureId(req.params.id);
     const cliente = await clientesService.actualizar(id, req.body);
     res.status(200).json(cliente);
   } catch (error) {
@@ -40,7 +41,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = ensureId(req.params.id);
     const cliente = await clientesService.eliminar(id);
     res.status(200).json({ mensaje: "Cliente eliminado", cliente });
   } catch (error) {

@@ -1,43 +1,81 @@
 const clientesDao = require("../dao/clientes.dao");
+const ventasDao = require("../dao/ventas.dao");
+const {
+  createHttpError,
+  ensureNonEmptyString,
+  ensureOptionalBoolean,
+  ensureValidEmail,
+} = require("../utils/validation.utils");
 
-// SERVICE: contiene la lógica de negocio de clientes
+const validarPayloadCliente = (payload, { parcial = false } = {}) => {
+  const cambios = {};
 
-const obtenerTodos = async () => {
-  return await clientesDao.getAll();
+  if (!parcial || payload.nombre !== undefined) {
+    cambios.nombre = ensureNonEmptyString(payload.nombre, "nombre");
+  }
+
+  if (!parcial || payload.email !== undefined) {
+    cambios.email = ensureValidEmail(payload.email);
+  }
+
+  if (!parcial || payload.bloqueado !== undefined) {
+    cambios.bloqueado = ensureOptionalBoolean(payload.bloqueado, "bloqueado") ?? false;
+  }
+
+  return cambios;
 };
 
-const obtenerPorId = async (id) => {
-  const cliente = await clientesDao.getById(id);
-  if (!cliente) {
-    const error = new Error("Cliente no encontrado");
-    error.status = 404;
-    throw error;
+const validarEmailUnico = (email, clienteIdActual = null) => {
+  const existente = clientesDao.getByEmail(email);
+  if (existente && existente.id !== clienteIdActual) {
+    throw createHttpError("Ya existe un cliente con ese email", 400);
   }
+};
+
+const obtenerTodos = () => clientesDao.getAll();
+
+const obtenerPorId = (id) => {
+  const cliente = clientesDao.getById(id);
+  if (!cliente) {
+    throw createHttpError("Cliente no encontrado", 404);
+  }
+
   return cliente;
 };
 
-const crear = async ({ nombre, email, bloqueado = false }) => {
-  if (!nombre || nombre.trim() === "") {
-    const error = new Error("El nombre del cliente es obligatorio");
-    error.status = 400;
-    throw error;
-  }
-  if (!email || !email.includes("@")) {
-    const error = new Error("El email es inválido");
-    error.status = 400;
-    throw error;
-  }
-  return await clientesDao.create({ nombre, email, bloqueado });
+const crear = (payload) => {
+  const cliente = validarPayloadCliente(payload);
+  validarEmailUnico(cliente.email);
+  return clientesDao.create(cliente);
 };
 
-const actualizar = async (id, cambios) => {
-  await obtenerPorId(id);
-  return await clientesDao.update(id, cambios);
+const actualizar = (id, cambios) => {
+  const actual = obtenerPorId(id);
+
+  if (!cambios || Object.keys(cambios).length === 0) {
+    throw createHttpError("Debe enviar al menos un campo para actualizar", 400);
+  }
+
+  const cambiosValidados = validarPayloadCliente(cambios, { parcial: true });
+
+  if (cambiosValidados.email) {
+    validarEmailUnico(cambiosValidados.email, actual.id);
+  }
+
+  return clientesDao.update(id, cambiosValidados);
 };
 
-const eliminar = async (id) => {
-  await obtenerPorId(id);
-  return await clientesDao.remove(id);
+const eliminar = (id) => {
+  obtenerPorId(id);
+
+  if (ventasDao.existsByClienteId(id)) {
+    throw createHttpError(
+      "No se puede eliminar el cliente porque tiene ventas asociadas",
+      400
+    );
+  }
+
+  return clientesDao.remove(id);
 };
 
 module.exports = { obtenerTodos, obtenerPorId, crear, actualizar, eliminar };

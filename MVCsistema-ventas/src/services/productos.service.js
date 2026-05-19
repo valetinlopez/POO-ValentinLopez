@@ -1,49 +1,64 @@
 const productosDao = require("../dao/productos.dao");
+const ventasDao = require("../dao/ventas.dao");
+const {
+  createHttpError,
+  ensureNonEmptyString,
+  ensureNonNegativeInteger,
+  ensurePositiveNumber,
+} = require("../utils/validation.utils");
 
-// SERVICE: contiene la lógica de negocio de productos
-// Coordina operaciones y aplica validaciones antes de tocar el DAO
+const validarPayloadProducto = (payload, { parcial = false } = {}) => {
+  const cambios = {};
 
-const obtenerTodos = async () => {
-  return await productosDao.getAll();
+  if (!parcial || payload.nombre !== undefined) {
+    cambios.nombre = ensureNonEmptyString(payload.nombre, "nombre");
+  }
+
+  if (!parcial || payload.precio !== undefined) {
+    cambios.precio = ensurePositiveNumber(payload.precio, "precio");
+  }
+
+  if (!parcial || payload.stock !== undefined) {
+    cambios.stock = ensureNonNegativeInteger(payload.stock, "stock");
+  }
+
+  return cambios;
 };
 
-const obtenerPorId = async (id) => {
-  const producto = await productosDao.getById(id);
+const obtenerTodos = () => productosDao.getAll();
+
+const obtenerPorId = (id) => {
+  const producto = productosDao.getById(id);
   if (!producto) {
-    const error = new Error("Producto no encontrado");
-    error.status = 404;
-    throw error;
+    throw createHttpError("Producto no encontrado", 404);
   }
+
   return producto;
 };
 
-const crear = async ({ nombre, precio, stock }) => {
-  if (!nombre || nombre.trim() === "") {
-    const error = new Error("El nombre del producto es obligatorio");
-    error.status = 400;
-    throw error;
+const crear = (payload) => productosDao.create(validarPayloadProducto(payload));
+
+const actualizar = (id, cambios) => {
+  obtenerPorId(id);
+
+  if (!cambios || Object.keys(cambios).length === 0) {
+    throw createHttpError("Debe enviar al menos un campo para actualizar", 400);
   }
-  if (precio === undefined || precio <= 0) {
-    const error = new Error("El precio debe ser mayor a cero");
-    error.status = 400;
-    throw error;
-  }
-  if (stock === undefined || stock < 0) {
-    const error = new Error("El stock no puede ser negativo");
-    error.status = 400;
-    throw error;
-  }
-  return await productosDao.create({ nombre, precio, stock });
+
+  return productosDao.update(id, validarPayloadProducto(cambios, { parcial: true }));
 };
 
-const actualizar = async (id, cambios) => {
-  await obtenerPorId(id); // Valida que exista antes de actualizar
-  return await productosDao.update(id, cambios);
-};
+const eliminar = (id) => {
+  obtenerPorId(id);
 
-const eliminar = async (id) => {
-  await obtenerPorId(id); // Valida que exista antes de eliminar
-  return await productosDao.remove(id);
+  if (ventasDao.existsByProductoId(id)) {
+    throw createHttpError(
+      "No se puede eliminar el producto porque tiene ventas asociadas",
+      400
+    );
+  }
+
+  return productosDao.remove(id);
 };
 
 module.exports = { obtenerTodos, obtenerPorId, crear, actualizar, eliminar };

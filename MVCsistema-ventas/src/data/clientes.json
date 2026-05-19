@@ -1,5 +1,0 @@
-[
-  { "id": 1, "nombre": "Juan Perez", "email": "juan@mail.com", "bloqueado": false },
-  { "id": 2, "nombre": "Maria Lopez", "email": "maria@mail.com", "bloqueado": false },
-  { "id": 3, "nombre": "Carlos Ruiz", "email": "carlos@mail.com", "bloqueado": true }
-]

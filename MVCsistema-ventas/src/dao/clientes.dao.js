@@ -1,47 +1,75 @@
-const path = require("path");
-const { readJsonFile, writeJsonFile } = require("../utils/file.utils");
-const { generateId } = require("../utils/id.utils");
 const Cliente = require("../domain/Cliente");
+const { getDatabase } = require("../database/database");
 
-const DATA_PATH = path.join(__dirname, "../data/clientes.json");
-
-const getAll = async () => {
-  const data = await readJsonFile(DATA_PATH);
-  return data.map((item) => new Cliente(item));
-};
-
-const getById = async (id) => {
-  const clientes = await getAll();
-  return clientes.find((c) => c.id === id) || null;
-};
-
-const create = async (clienteData) => {
-  const clientes = await getAll();
-  const nuevoCliente = new Cliente({
-    id: generateId(clientes),
-    ...clienteData,
+const mapCliente = (row) =>
+  new Cliente({
+    ...row,
+    bloqueado: Boolean(row.bloqueado),
   });
-  clientes.push(nuevoCliente);
-  await writeJsonFile(DATA_PATH, clientes);
-  return nuevoCliente;
+
+const getAll = () => {
+  const db = getDatabase();
+  const rows = db
+    .prepare("SELECT id, nombre, email, bloqueado FROM clientes ORDER BY id")
+    .all();
+
+  return rows.map(mapCliente);
 };
 
-const update = async (id, cambios) => {
-  const clientes = await getAll();
-  const index = clientes.findIndex((c) => c.id === id);
-  if (index === -1) return null;
-  clientes[index] = new Cliente({ ...clientes[index], ...cambios });
-  await writeJsonFile(DATA_PATH, clientes);
-  return clientes[index];
+const getById = (id) => {
+  const db = getDatabase();
+  const row = db
+    .prepare("SELECT id, nombre, email, bloqueado FROM clientes WHERE id = ?")
+    .get(id);
+
+  return row ? mapCliente(row) : null;
 };
 
-const remove = async (id) => {
-  const clientes = await getAll();
-  const index = clientes.findIndex((c) => c.id === id);
-  if (index === -1) return null;
-  const eliminado = clientes.splice(index, 1)[0];
-  await writeJsonFile(DATA_PATH, clientes);
-  return eliminado;
+const getByEmail = (email) => {
+  const db = getDatabase();
+  const row = db
+    .prepare("SELECT id, nombre, email, bloqueado FROM clientes WHERE lower(email) = lower(?)")
+    .get(email);
+
+  return row ? mapCliente(row) : null;
 };
 
-module.exports = { getAll, getById, create, update, remove };
+const create = (clienteData) => {
+  const db = getDatabase();
+  const result = db
+    .prepare("INSERT INTO clientes (nombre, email, bloqueado) VALUES (?, ?, ?)")
+    .run(clienteData.nombre, clienteData.email, clienteData.bloqueado ? 1 : 0);
+
+  return getById(Number(result.lastInsertRowid));
+};
+
+const update = (id, cambios) => {
+  const actual = getById(id);
+  if (!actual) {
+    return null;
+  }
+
+  const siguiente = { ...actual, ...cambios };
+  const db = getDatabase();
+
+  db.prepare(`
+    UPDATE clientes
+    SET nombre = ?, email = ?, bloqueado = ?
+    WHERE id = ?
+  `).run(siguiente.nombre, siguiente.email, siguiente.bloqueado ? 1 : 0, id);
+
+  return getById(id);
+};
+
+const remove = (id) => {
+  const cliente = getById(id);
+  if (!cliente) {
+    return null;
+  }
+
+  const db = getDatabase();
+  db.prepare("DELETE FROM clientes WHERE id = ?").run(id);
+  return cliente;
+};
+
+module.exports = { getAll, getById, getByEmail, create, update, remove };
