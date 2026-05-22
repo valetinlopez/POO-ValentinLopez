@@ -1,0 +1,26 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS productos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre TEXT NOT NULL,
+  precio REAL NOT NULL CHECK (precio > 0),
+  stock INTEGER NOT NULL CHECK (stock >= 0)
+);
+
+CREATE TABLE IF NOT EXISTS clientes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  bloqueado INTEGER NOT NULL DEFAULT 0 CHECK (bloqueado IN (0, 1))
+);
+
+CREATE TABLE IF NOT EXISTS ventas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id INTEGER NOT NULL,
+  producto_id INTEGER NOT NULL,
+  cantidad INTEGER NOT NULL CHECK (cantidad > 0),
+  total REAL NOT NULL CHECK (total >= 0),
+  fecha TEXT NOT NULL,
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE RESTRICT,
+  FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE RESTRICT
+);

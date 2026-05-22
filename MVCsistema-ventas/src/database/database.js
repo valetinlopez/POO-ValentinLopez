@@ -1,10 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 const { DatabaseSync } = require("node:sqlite");
-const { loadSeedData } = require("./seed-data");
 
 const DB_DIRECTORY = path.join(__dirname, "data");
 const DB_PATH = process.env.DB_PATH || path.join(DB_DIRECTORY, "sistema-ventas.db");
+const SCHEMA_PATH = path.join(__dirname, "schema.sql");
+const SEED_PATH = path.join(__dirname, "seed.sql");
 
 let databaseInstance = null;
 let initialized = false;
@@ -12,6 +13,8 @@ let initialized = false;
 const ensureDatabaseDirectory = () => {
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 };
+
+const readSqlFile = (filePath) => fs.readFileSync(filePath, "utf8");
 
 const withDatabaseTransaction = (db, callback) => {
   db.exec("BEGIN IMMEDIATE TRANSACTION;");
@@ -26,37 +29,6 @@ const withDatabaseTransaction = (db, callback) => {
   }
 };
 
-const createSchema = (db) => {
-  db.exec(`
-    PRAGMA foreign_keys = ON;
-
-    CREATE TABLE IF NOT EXISTS productos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nombre TEXT NOT NULL,
-      precio REAL NOT NULL CHECK (precio > 0),
-      stock INTEGER NOT NULL CHECK (stock >= 0)
-    );
-
-    CREATE TABLE IF NOT EXISTS clientes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nombre TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      bloqueado INTEGER NOT NULL DEFAULT 0 CHECK (bloqueado IN (0, 1))
-    );
-
-    CREATE TABLE IF NOT EXISTS ventas (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      cliente_id INTEGER NOT NULL,
-      producto_id INTEGER NOT NULL,
-      cantidad INTEGER NOT NULL CHECK (cantidad > 0),
-      total REAL NOT NULL CHECK (total >= 0),
-      fecha TEXT NOT NULL,
-      FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE RESTRICT,
-      FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE RESTRICT
-    );
-  `);
-};
-
 const reseedSequence = (db, tableName) => {
   const maxId = db.prepare(`SELECT COALESCE(MAX(id), 0) AS maxId FROM ${tableName}`).get().maxId;
 
@@ -69,60 +41,33 @@ const reseedSequence = (db, tableName) => {
   }
 };
 
-const seedTableIfEmpty = (db, tableName, items, insertItem) => {
-  const count = db.prepare(`SELECT COUNT(*) AS total FROM ${tableName}`).get().total;
-  if (count > 0 || items.length === 0) {
-    return;
-  }
+const createSchema = (db) => {
+  const schemaSql = readSqlFile(SCHEMA_PATH);
+  db.exec(schemaSql);
+};
 
-  withDatabaseTransaction(db, () => {
-    for (const row of items) {
-      insertItem(row);
-    }
-  });
+const shouldRunSeed = (db) => {
+  const productos = db.prepare("SELECT COUNT(*) AS total FROM productos").get().total;
+  const clientes = db.prepare("SELECT COUNT(*) AS total FROM clientes").get().total;
+  const ventas = db.prepare("SELECT COUNT(*) AS total FROM ventas").get().total;
 
-  reseedSequence(db, tableName);
+  return productos === 0 && clientes === 0 && ventas === 0;
 };
 
 const seedDatabase = (db) => {
-  const seedData = loadSeedData();
+  if (!shouldRunSeed(db)) {
+    return;
+  }
 
-  const insertProducto = db.prepare(`
-    INSERT INTO productos (id, nombre, precio, stock)
-    VALUES (?, ?, ?, ?)
-  `);
-  const insertCliente = db.prepare(`
-    INSERT INTO clientes (id, nombre, email, bloqueado)
-    VALUES (?, ?, ?, ?)
-  `);
-  const insertVenta = db.prepare(`
-    INSERT INTO ventas (id, cliente_id, producto_id, cantidad, total, fecha)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
+  const seedSql = readSqlFile(SEED_PATH);
 
-  seedTableIfEmpty(db, "productos", seedData.productos, (producto) => {
-    insertProducto.run(producto.id, producto.nombre, producto.precio, producto.stock);
+  withDatabaseTransaction(db, () => {
+    db.exec(seedSql);
   });
 
-  seedTableIfEmpty(db, "clientes", seedData.clientes, (cliente) => {
-    insertCliente.run(
-      cliente.id,
-      cliente.nombre,
-      cliente.email,
-      cliente.bloqueado ? 1 : 0
-    );
-  });
-
-  seedTableIfEmpty(db, "ventas", seedData.ventas, (venta) => {
-    insertVenta.run(
-      venta.id,
-      venta.clienteId,
-      venta.productoId,
-      venta.cantidad,
-      venta.total,
-      venta.fecha
-    );
-  });
+  reseedSequence(db, "productos");
+  reseedSequence(db, "clientes");
+  reseedSequence(db, "ventas");
 };
 
 const getDatabase = () => {

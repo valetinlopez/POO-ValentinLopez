@@ -6,7 +6,8 @@ Proyecto backend MVC para gestionar productos, clientes y ventas con persistenci
 
 - Persistencia real en base de datos SQLite.
 - Inicializacion automatica de tablas al arrancar.
-- Seed inicial en codigo para productos y clientes.
+- `schema.sql` para estructura de base.
+- `seed.sql` para datos iniciales.
 - Validaciones mas estrictas en altas y actualizaciones.
 - Emails de clientes unicos.
 - IDs invalidos responden `400`.
@@ -34,7 +35,7 @@ DB_PATH
 - `controllers`: recibe `req`, responde `res`.
 - `services`: concentra reglas de negocio.
 - `dao`: ejecuta consultas SQL.
-- `database`: conexion, esquema, seed y transacciones.
+- `database`: conexion, esquema, seeds y transacciones.
 - `domain`: clases `Producto`, `Cliente`, `Venta`.
 
 ## Ejecucion

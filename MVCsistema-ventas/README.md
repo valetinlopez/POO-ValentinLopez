@@ -9,7 +9,7 @@ API REST construida con Node.js y Express usando arquitectura MVC en capas:
 - `domain`: modela entidades.
 - `database`: inicializa y administra SQLite.
 
-La persistencia se realiza en una base de datos SQLite local. Si la base esta vacia, se carga un seed inicial definido en codigo.
+La persistencia se realiza en una base de datos SQLite local. Si la base esta vacia, se ejecutan los archivos `schema.sql` y `seed.sql`.
 
 ## Funcionalidades
 
@@ -41,6 +41,8 @@ MVCsistema-ventas/
 |   |-- controllers/
 |   |-- dao/
 |   |-- database/
+|   |   |-- schema.sql
+|   |   `-- seed.sql
 |   |-- domain/
 |   |-- middlewares/
 |   |-- routes/
@@ -165,5 +167,6 @@ La configuracion usa:
 
 ## Notas
 
-- El seed inicial vive en `src/database/seed-data.js`.
+- La estructura de la base vive en `src/database/schema.sql`.
+- Los datos iniciales viven en `src/database/seed.sql`.
 - El archivo SQLite generado se ignora en Git mediante `.gitignore`.
