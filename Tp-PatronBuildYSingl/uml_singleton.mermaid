@@ -1,0 +1,29 @@
+classDiagram
+    class Logger {
+        -_instancia: Logger$
+        -_historial: list~str~
+        +__new__() Logger$
+        +log(mensaje: str) void
+        +ver_historial() list~str~
+    }
+    note for Logger "Singleton:\n_instancia es un atributo de CLASE.\n__new__ controla la creación y\nsiempre devuelve la misma instancia."
+
+    class LoginService {
+        -logger: Logger
+        +iniciar_sesion(usuario: str)
+        +cerrar_sesion(usuario: str)
+    }
+
+    class TransferService {
+        -logger: Logger
+        +transferir(monto: float)
+    }
+
+    class AccountService {
+        -logger: Logger
+        +consultar_saldo()
+    }
+
+    LoginService --> Logger : usa
+    TransferService --> Logger : usa
+    AccountService --> Logger : usa

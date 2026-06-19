@@ -1,0 +1,46 @@
+classDiagram
+    class TipoCuenta {
+        <<enumeration>>
+        CAJA_AHORRO
+        CUENTA_CORRIENTE
+    }
+
+    class Moneda {
+        <<enumeration>>
+        ARS
+        USD
+    }
+
+    class CuentaBancaria {
+        -titular: str
+        -dni: str
+        -tipo_cuenta: TipoCuenta
+        -moneda: Moneda
+        -tarjeta_debito: bool
+        -chequera: bool
+        -home_banking: bool
+        -limite_extraccion: float
+        +__str__() str
+    }
+
+    class CuentaBancariaBuilder {
+        -_cuenta: CuentaBancaria
+        +con_titular(nombre) CuentaBancariaBuilder
+        +con_dni(dni) CuentaBancariaBuilder
+        +con_tipo_cuenta(tipo) CuentaBancariaBuilder
+        +con_moneda(moneda) CuentaBancariaBuilder
+        +con_tarjeta_debito(valor) CuentaBancariaBuilder
+        +con_chequera(valor) CuentaBancariaBuilder
+        +con_home_banking(valor) CuentaBancariaBuilder
+        +con_limite_extraccion(monto) CuentaBancariaBuilder
+        +build() CuentaBancaria
+    }
+
+    class ClienteApp {
+        +main()
+    }
+
+    CuentaBancariaBuilder ..> CuentaBancaria : construye
+    CuentaBancaria --> TipoCuenta
+    CuentaBancaria --> Moneda
+    ClienteApp ..> CuentaBancariaBuilder : usa
