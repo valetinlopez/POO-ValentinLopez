@@ -1,7 +1,7 @@
-# TP - Metodos heredados de `object`
+# TP - Métodos heredados de `object`
 
-Este trabajo muestra como se comporta una clase en Python cuando usa los
-metodos heredados de `object` y que cambia cuando esos metodos se
+Este trabajo muestra cómo se comporta una clase en Python cuando usa los
+métodos heredados de `object` y qué cambia cuando esos métodos se
 sobrescriben.
 
 ## Clase utilizada
@@ -17,12 +17,12 @@ defecto y el comportamiento sobrescrito.
 
 ## Archivos
 
-- `MetHeredados.py`: demuestra los metodos heredados de `object` sin
+- `MetHeredados.py`: demuestra los métodos heredados de `object` sin
   sobrescribirlos.
 - `MetSobreescritos.py`: demuestra la misma clase sobrescribiendo `__str__`,
   `__repr__`, `__eq__` y `__hash__`.
 
-## Como ejecutar
+## Cómo ejecutar
 
 Desde la carpeta del proyecto:
 
@@ -31,28 +31,28 @@ python Tp-metodosHeredados/MetHeredados.py
 python Tp-metodosHeredados/MetSobreescritos.py
 ```
 
-## Parte 1: metodos heredados
+## Parte 1: métodos heredados
 
 En `MetHeredados.py`, la clase `Persona` solo define `__init__`. Por eso usa
-los metodos especiales que hereda de `object`.
+los métodos especiales que hereda de `object`.
 
 Se comprueba:
 
 - Imprimir el objeto directamente con `print(persona1)`.
 - Convertirlo a texto con `str(persona1)`.
-- Obtener su representacion con `repr(persona1)`.
+- Obtener su representación con `repr(persona1)`.
 - Comparar dos objetos con `persona1 == persona2`.
 - Obtener su hash con `hash(persona1)`.
 - Mostrar su tipo con `type(persona1)`.
-- Ver sus atributos y metodos con `dir(persona1)`.
+- Ver sus atributos y métodos con `dir(persona1)`.
 
 ### Resultado esperado
 
-Aunque `persona1` y `persona2` tienen los mismos datos, la comparacion da
+Aunque `persona1` y `persona2` tienen los mismos datos, la comparación da
 `False` porque `object.__eq__` compara identidad, es decir, si son exactamente
 el mismo objeto en memoria.
 
-Tambien se ve una representacion similar a:
+También se ve una representación similar a:
 
 ```text
 <__main__.Persona object at 0x...>
@@ -60,13 +60,13 @@ Tambien se ve una representacion similar a:
 
 Esa salida corresponde al comportamiento por defecto heredado de `object`.
 
-## Parte 2: metodos sobrescritos
+## Parte 2: métodos sobrescritos
 
-En `MetSobreescritos.py` se redefinen metodos especiales para que la clase
-tenga un comportamiento mas claro y util:
+En `MetSobreescritos.py` se redefinen métodos especiales para que la clase
+tenga un comportamiento más claro y útil:
 
-- `__str__`: devuelve una representacion legible para el usuario.
-- `__repr__`: devuelve una representacion mas precisa para depuracion.
+- `__str__`: devuelve una representación legible para el usuario.
+- `__repr__`: devuelve una representación más precisa para depuración.
 - `__eq__`: compara por valor, usando `nombre`, `edad` y `email`.
 - `__hash__`: genera un hash consistente con la igualdad.
 
@@ -84,12 +84,12 @@ devuelve:
 True
 ```
 
-Ademas, si dos objetos son iguales, sus hashes tambien deben ser iguales. Por
+Además, si dos objetos son iguales, sus hashes también deben ser iguales. Por
 eso `__hash__` se calcula con los mismos atributos usados en `__eq__`.
 
-## Respuestas teoricas
+## Respuestas teóricas
 
-### Que imprime el objeto antes de sobrescribir `__str__()`
+### Qué imprime el objeto antes de sobrescribir `__str__()`
 
 Imprime algo parecido a:
 
@@ -97,31 +97,31 @@ Imprime algo parecido a:
 <__main__.Persona object at 0x...>
 ```
 
-Esto ocurre porque Python usa la representacion por defecto heredada de
-`object`, que muestra el modulo, la clase y una direccion de memoria.
+Esto ocurre porque Python usa la representación por defecto heredada de
+`object`, que muestra el módulo, la clase y una dirección de memoria.
 
-### Que cambia despues de implementar `__str__()`
+### Qué cambia después de implementar `__str__()`
 
 `print(persona)` y `str(persona)` muestran el texto definido dentro de
 `__str__`, por ejemplo:
 
 ```text
-Ana (30 anos) - ana@mail.com
+Ana (30 años) - ana@mail.com
 ```
 
-Esto hace que el objeto sea mas facil de leer para una persona.
+Esto hace que el objeto sea más fácil de leer para una persona.
 
-### Por que `p1 == p2` primero da `False`
+### Por qué `p1 == p2` primero da `False`
 
 Porque, por defecto, `object.__eq__` compara identidad. Aunque los atributos
 sean iguales, `p1` y `p2` son dos objetos distintos en memoria.
 
-### Por que despues puede dar `True`
+### Por qué después puede dar `True`
 
-Porque al sobrescribir `__eq__` se cambia el criterio de comparacion. En lugar
+Porque al sobrescribir `__eq__` se cambia el criterio de comparación. En lugar
 de comparar identidad, se comparan los valores de `nombre`, `edad` y `email`.
 
-### Que relacion tienen `__eq__()` y `__hash__()`
+### Qué relación tienen `__eq__()` y `__hash__()`
 
 Python mantiene una regla importante:
 
@@ -129,22 +129,22 @@ Python mantiene una regla importante:
 Si dos objetos son iguales con ==, deben tener el mismo hash.
 ```
 
-Por eso, si se sobrescribe `__eq__`, tambien conviene definir `__hash__` usando
+Por eso, si se sobrescribe `__eq__`, también conviene definir `__hash__` usando
 los mismos atributos. Esto permite que los objetos funcionen correctamente en
 estructuras como `set` y como claves de un `dict`.
 
-### Cual es el equivalente de `getClass()` de Java en Python
+### Cuál es el equivalente de `getClass()` de Java en Python
 
-El equivalente mas directo es:
+El equivalente más directo es:
 
 ```python
 type(objeto)
 ```
 
-Tambien se puede usar:
+También se puede usar:
 
 ```python
 objeto.__class__
 ```
 
-En general, `type()` es la forma mas clara para mostrar la clase de un objeto.
+En general, `type()` es la forma más clara para mostrar la clase de un objeto.
