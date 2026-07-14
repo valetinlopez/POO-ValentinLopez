@@ -1,17 +1,12 @@
 """
-TP - Metodos heredados de object
+TP - Métodos heredados de object
 
-En este archivo se crea una clase Persona sin sobrescribir metodos
-especiales. Asi se puede observar el comportamiento heredado de object:
+En este archivo se usa una clase Persona sin sobrescribir métodos
+especiales. Así se puede observar el comportamiento heredado de object:
 __str__, __repr__, __eq__, __hash__, type() y dir().
 """
 
-
-class Persona:
-    def __init__(self, nombre: str, edad: int, email: str) -> None:
-        self.nombre = nombre
-        self.edad = edad
-        self.email = email
+from sources.persona_heredada import Persona
 
 
 def main() -> None:
@@ -44,7 +39,7 @@ def main() -> None:
     print(type(persona1))
 
     print("=" * 60)
-    print("7) Mostrar atributos y metodos con dir()")
+    print("7) Mostrar atributos y métodos con dir()")
     print(dir(persona1))
 
 

@@ -4,6 +4,23 @@ Este trabajo muestra cómo se comporta una clase en Python cuando usa los
 métodos heredados de `object` y qué cambia cuando esos métodos se
 sobrescriben.
 
+## Estructura del proyecto
+
+```text
+Tp-metodosHeredados/
+├── MetHeredados.py
+├── MetSobreescritos.py
+├── Readme.md
+├── sources/
+│   ├── __init__.py
+│   ├── persona_heredada.py
+│   └── persona_sobreescrita.py
+└── tests/
+    ├── __init__.py
+    ├── test_persona_heredada.py
+    └── test_persona_sobreescrita.py
+```
+
 ## Clase utilizada
 
 La clase `Persona` contiene tres atributos:
@@ -13,28 +30,55 @@ La clase `Persona` contiene tres atributos:
 - `email`
 
 Se crean dos objetos con los mismos datos para comparar el comportamiento por
-defecto y el comportamiento sobrescrito.
+defecto contra el comportamiento sobrescrito.
 
-## Archivos
+## Archivos principales
 
-- `MetHeredados.py`: demuestra los métodos heredados de `object` sin
-  sobrescribirlos.
-- `MetSobreescritos.py`: demuestra la misma clase sobrescribiendo `__str__`,
-  `__repr__`, `__eq__` y `__hash__`.
+- `sources/persona_heredada.py`: contiene la clase `Persona` sin sobrescribir
+  métodos especiales.
+- `sources/persona_sobreescrita.py`: contiene la clase `Persona` con
+  `__str__`, `__repr__`, `__eq__` y `__hash__` sobrescritos.
+- `MetHeredados.py`: script de demostración de los métodos heredados.
+- `MetSobreescritos.py`: script de demostración de los métodos sobrescritos.
+- `tests/`: contiene los tests unitarios hechos con `unittest`.
 
-## Cómo ejecutar
+## Cómo ejecutar las demostraciones
 
-Desde la carpeta del proyecto:
+Desde la carpeta raíz del repositorio:
 
 ```bash
 python Tp-metodosHeredados/MetHeredados.py
 python Tp-metodosHeredados/MetSobreescritos.py
 ```
 
+También se pueden ejecutar desde adentro de la carpeta del TP:
+
+```bash
+cd Tp-metodosHeredados
+python MetHeredados.py
+python MetSobreescritos.py
+```
+
+## Cómo ejecutar los tests
+
+Desde la carpeta `Tp-metodosHeredados`:
+
+```bash
+python -m unittest discover -s tests
+```
+
+Resultado esperado:
+
+```text
+Ran 10 tests
+
+OK
+```
+
 ## Parte 1: métodos heredados
 
-En `MetHeredados.py`, la clase `Persona` solo define `__init__`. Por eso usa
-los métodos especiales que hereda de `object`.
+En `sources/persona_heredada.py`, la clase `Persona` solo define `__init__`.
+Por eso usa los métodos especiales que hereda de `object`.
 
 Se comprueba:
 
@@ -46,8 +90,6 @@ Se comprueba:
 - Mostrar su tipo con `type(persona1)`.
 - Ver sus atributos y métodos con `dir(persona1)`.
 
-### Resultado esperado
-
 Aunque `persona1` y `persona2` tienen los mismos datos, la comparación da
 `False` porque `object.__eq__` compara identidad, es decir, si son exactamente
 el mismo objeto en memoria.
@@ -55,22 +97,20 @@ el mismo objeto en memoria.
 También se ve una representación similar a:
 
 ```text
-<__main__.Persona object at 0x...>
+<sources.persona_heredada.Persona object at 0x...>
 ```
 
 Esa salida corresponde al comportamiento por defecto heredado de `object`.
 
 ## Parte 2: métodos sobrescritos
 
-En `MetSobreescritos.py` se redefinen métodos especiales para que la clase
-tenga un comportamiento más claro y útil:
+En `sources/persona_sobreescrita.py` se redefinen métodos especiales para que
+la clase tenga un comportamiento más claro y útil:
 
 - `__str__`: devuelve una representación legible para el usuario.
 - `__repr__`: devuelve una representación más precisa para depuración.
 - `__eq__`: compara por valor, usando `nombre`, `edad` y `email`.
 - `__hash__`: genera un hash consistente con la igualdad.
-
-### Resultado esperado
 
 Ahora dos objetos con los mismos datos pueden considerarse iguales:
 
@@ -87,6 +127,19 @@ True
 Además, si dos objetos son iguales, sus hashes también deben ser iguales. Por
 eso `__hash__` se calcula con los mismos atributos usados en `__eq__`.
 
+## Tests unitarios
+
+Los tests verifican:
+
+- Que los atributos se guarden correctamente.
+- Que `str()` y `repr()` heredados muestren la representación por defecto.
+- Que dos objetos no sobrescritos comparen por identidad.
+- Que `hash()` funcione en la clase heredada.
+- Que `str()` y `repr()` sobrescritos devuelvan los textos esperados.
+- Que `__eq__` sobrescrito compare por valor.
+- Que `__hash__` sea consistente con `__eq__`.
+- Que `type()` y `dir()` incluyan la información esperada.
+
 ## Respuestas teóricas
 
 ### Qué imprime el objeto antes de sobrescribir `__str__()`
@@ -94,7 +147,7 @@ eso `__hash__` se calcula con los mismos atributos usados en `__eq__`.
 Imprime algo parecido a:
 
 ```text
-<__main__.Persona object at 0x...>
+<sources.persona_heredada.Persona object at 0x...>
 ```
 
 Esto ocurre porque Python usa la representación por defecto heredada de

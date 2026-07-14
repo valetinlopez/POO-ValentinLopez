@@ -1,54 +1,11 @@
 """
 TP - Métodos heredados de object
 Parte 2: Sobrescribimos los métodos especiales para que la clase
-se comporte de forma "Pythónica" (comparación por valor, hash
+se comporte de forma pythonica (comparación por valor, hash
 consistente, representación legible, etc.)
 """
 
-from __future__ import annotations
-
-
-class Persona:
-    """Representa una persona con nombre, edad y email.
-
-    Buenas prácticas aplicadas:
-    - Type hints en atributos y métodos.
-    - __repr__ : representación NO ambigua, pensada para developers/debug.
-      Convención: debería poder "reconstruir" el objeto (eval(repr(obj))).
-    - __str__  : representación legible, pensada para el usuario final.
-      Si no se define, Python usa __repr__ como fallback.
-    - __eq__   : compara por VALOR (mismos datos), no por identidad.
-      Se valida el tipo con isinstance antes de comparar.
-    - __hash__ : se redefine en conjunto con __eq__, usando los MISMOS
-      atributos, para respetar el contrato hash <-> igualdad de Python:
-      "si a == b, entonces hash(a) == hash(b)".
-    """
-
-    def __init__(self, nombre: str, edad: int, email: str) -> None:
-        self.nombre = nombre
-        self.edad = edad
-        self.email = email
-
-    def __str__(self) -> str:
-        # Pensado para el usuario final (print, str())
-        return f"{self.nombre} ({self.edad} años) - {self.email}"
-
-    def __repr__(self) -> str:
-        # Pensado para debugging / logs, sin ambigüedad
-        return f"Persona(nombre={self.nombre!r}, edad={self.edad!r}, email={self.email!r})"
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Persona):
-            return NotImplemented
-        return (
-            self.nombre == other.nombre
-            and self.edad == other.edad
-            and self.email == other.email
-        )
-
-    def __hash__(self) -> int:
-        # Debe basarse en los mismos campos que __eq__
-        return hash((self.nombre, self.edad, self.email))
+from sources.persona_sobreescrita import Persona
 
 
 def main() -> None:
